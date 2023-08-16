@@ -138,8 +138,8 @@ def send_answer(sender, instance, **kwargs):
         text = "Администратор проверил документ и передал его в Binance. " \
                "В течении 4 рабочих дней Binance оповестит Вас по электронной почте указанной в договоре " \
                "о том, что Вам доступен функционал управляемых субсчетов." \
-               "\n\nПосле получения этого уведомления от Binance, Вам нужно совершить следующие шаги:" \
-               "\n\n1. Зайдите с компьютера или ноутбука в свой профиль Binance (иконка Вашего профиля вверху справа)." \
+               "\n\nПосле получения этого уведомления от Binance, Вам нужно совершить следующие шаги:\n" \
+               "\n1. Зайдите с компьютера или ноутбука в свой профиль Binance (иконка Вашего профиля вверху справа)." \
                "\n2.В открывшемся меню, снизу появился раздел “Субаккаунты”." \
                "\n3. Слева в меню раздела нажмите “Управляемый субаккаунт” Будьте внимательны, не спутав его с " \
                "разделом “Управление аккаунтом”" \
@@ -147,8 +147,8 @@ def send_answer(sender, instance, **kwargs):
                "В правом верхнем углу нажмите на кнопку “Создать управляемый субаккаунт”." \
                "Появится окно создания субаккаунта." \
                "Нужно ввести название счета. Название счёта должно быть написано латинскими буквами и содержать ваши " \
-               "Имя и Фамилию. Данная информация нужна, чтобы наши технические специалисты могли идентифицировать Вас " \
-               "в клиентской базе." \
+               "Имя и Фамилию. Данная информация нужна, чтобы наши технические специалисты могли идентифицировать Вас" \
+               " в клиентской базе." \
                "Указываете наш UID2 и наш email, которые Вам отправил наш администратор." \
                "Система запросит подтверждение операции. " \
                "После подтверждения система присвоит субсчету виртуальный адрес электронной почты (alias), " \
@@ -170,8 +170,8 @@ def send_answer(sender, instance, **kwargs):
                    "Managed Subaccount'." \
                    "A subaccount creation window will appear." \
                    "Enter the account name. The account name should be written in Latin letters and include your " \
-                   "First Name and Last Name. This information is needed for our technical specialists to identify you " \
-                   "in the customer database." \
+                   "First Name and Last Name. This information is needed for our technical specialists to identify " \
+                   "you in the customer database." \
                    "Specify our UID2 and our email, which our administrator sent to you." \
                    "The system will request confirmation of the operation. " \
                    "After confirmation, the system will assign a virtual email address (alias) to the subaccount, " \
