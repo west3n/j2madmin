@@ -10,6 +10,7 @@ from aiogram import types, Bot, Dispatcher
 from decouple import config
 from django.dispatch import receiver
 from app.models import Documents, Output, SendMessage, Binance, SendMessageForGroup
+from google_sheets.old_data import sheets_connection
 
 
 def connect():
@@ -219,9 +220,25 @@ def send_answer(sender, instance, **kwargs):
         session = await bot.get_session()
         tg_id = instance.tg_id_id
         language = get_language(tg_id)
+        db, cur = connect()
+        try:
+            cur.execute("INSERT INTO app_balancehistory (tg_id_id, transaction, date, amount, description, status) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)",
+                        (tg_id, "OUT", datetime.datetime.now(), instance.amount, instance.hash, True,))
+            db.commit()
+            cur.execute("UPDATE app_balance SET withdrawal=0 WHERE tg_id_id = %s", (tg_id,))
+            db.commit()
+            sh = await sheets_connection()
+            worksheet_name = "Сумма пополнения пула"
+            worksheet = sh.worksheet(worksheet_name)
+            worksheet.append_row((datetime.datetime.now().date().strftime("%Y-%m-%d"),
+                                  tg_id, "Вывод", f"-{instance.amount}"))
+        finally:
+            db.close()
+            cur.close()
         text = f"Средства ({instance.amount} USDT) успешно выведены!\n\n" \
                f"Хэш транзакции: {instance.hash}"
-        await insert_balance_history(instance.tg_id_id, instance.amount, instance.hash)
+
         if language == "EN":
             text = f"Funds ({instance.amount} USDT) have been successfully withdrawn!\n\n"
             f"Transaction hash: {instance.hash}"
@@ -243,9 +260,11 @@ def send_answer(sender, instance, **kwargs):
         session = await bot.get_session()
         tg_id = instance.tg_id_id
         language = get_language(tg_id)
-        text = "<b>Администратор отменил вашу заявку на вывод, для подробностей напишите в <a href='https://t.me/J2M_Support'>Поддержку</a></b>"
+        text = "<b>Администратор отменил вашу заявку на вывод, для подробностей напишите " \
+               "в <a href='https://t.me/J2M_Support'>Поддержку</a></b>"
         if language == "EN":
-            text = "<b>The administrator has canceled your withdrawal request. For details, please contact <a href='https://t.me/J2M_Support'>Support</a>.</b>"
+            text = "<b>The administrator has canceled your withdrawal request. " \
+                   "For details, please contact <a href='https://t.me/J2M_Support'>Support</a>.</b>"
         await bot.send_message(chat_id=tg_id,
                                text=text,
                                reply_markup=keyboard_2(language),
@@ -286,7 +305,7 @@ def send_message_for_user(sender, instance, **kwargs):
         session = await bot.get_session()
         tg_id = instance.tg_id_id
         language = get_language(tg_id)
-        text = f"<b>Администратор подтвердил ваши данные по API KEY, API SECRET, Alias</b>"
+        text = f"Администратор подтвердил ваши данные по API KEY, API SECRET, Alias"
         if language == "EN":
             text = f"<b>The administrator has confirmed your API KEY, API SECRET, and Alias.</b>"
         await bot.send_message(chat_id=tg_id,
