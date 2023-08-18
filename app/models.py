@@ -31,7 +31,7 @@ class Balance(models.Model):
     deposit = models.FloatField(verbose_name="Активный депозит", null=False, default=0)
     withdrawal = models.FloatField(verbose_name="Зарезервированная сумма для вывода", blank=True, null=True)
     referral_balance = models.FloatField(verbose_name="Реферальный баланс", blank=True, null=True)
-    hold = models.IntegerField(verbose_name="Выбранное количество дней холда (для 1000ников)", blank=True, null=True)
+    hold = models.IntegerField(verbose_name="Количество дней холда", blank=True, null=True)
     settings = models.IntegerField(verbose_name="Настройки перевода с баланса на активный депозит (%)", blank=True, null=True)
     weekly_profit = models.FloatField(verbose_name="Доход за торговую неделю", blank=True, null=True)
 
@@ -42,6 +42,21 @@ class Balance(models.Model):
         verbose_name = 'Баланс пользователя'
         verbose_name_plural = 'КОЛЛЕКТИВНЫЙ АККАУНТ - Балансы пользователей'
 
+
+class StabPool(models.Model):
+    tg_id = models.ForeignKey(J2MUser, verbose_name="Пользователь ID", on_delete=models.CASCADE)
+    balance = models.FloatField(verbose_name="Баланс", null=False, default=0)
+    deposit = models.FloatField(verbose_name="Активный депозит", null=False, default=0)
+    withdrawal = models.FloatField(verbose_name="Зарезервированная сумма для вывода", blank=True, null=True)
+    hold = models.IntegerField(verbose_name="Количество дней холда", blank=True, null=True)
+    weekly_profit = models.FloatField(verbose_name="Доход за торговую неделю", blank=True, null=True)
+
+    def __str__(self):
+        return f"Пользователь: {self.tg_id}"
+
+    class Meta:
+        verbose_name = 'Баланс пользователя'
+        verbose_name_plural = 'СТАБИЛИЗАЦИОННЫЙ ПУЛ - Балансы пользователей'
 
 class BalanceStatus(models.TextChoices):
     IN = 'IN', 'Пополнение'
