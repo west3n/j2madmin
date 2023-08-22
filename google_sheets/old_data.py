@@ -1,4 +1,3 @@
-import asyncio
 import gspread
 
 from decouple import config
@@ -8,7 +7,7 @@ from database import injector
 
 async def sheets_connection():
     sheet_url = config("SHEET_URL")
-    credentials_path = "j2m-project-395212-6143ef593cd0.json"
+    credentials_path = "google_sheets/j2m-project-395212-6143ef593cd0.json"
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     gc = gspread.authorize(credentials)
@@ -75,6 +74,3 @@ async def balance_sheets():
     balance_data = await injector.balance_data()
     for row_data in balance_data:
         worksheet.append_row(row_data)
-
-
-asyncio.run(balance_sheets())

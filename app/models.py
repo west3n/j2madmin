@@ -32,7 +32,8 @@ class Balance(models.Model):
     withdrawal = models.FloatField(verbose_name="Зарезервированная сумма для вывода", blank=True, null=True)
     referral_balance = models.FloatField(verbose_name="Реферальный баланс", blank=True, null=True)
     hold = models.IntegerField(verbose_name="Количество дней холда", blank=True, null=True)
-    settings = models.IntegerField(verbose_name="Настройки перевода с баланса на активный депозит (%)", blank=True, null=True)
+    settings = models.IntegerField(verbose_name="Настройки перевода с баланса на активный депозит (%)", blank=True,
+                                   null=True)
     weekly_profit = models.FloatField(verbose_name="Доход за торговую неделю", blank=True, null=True)
 
     def __str__(self):
@@ -58,6 +59,7 @@ class StabPool(models.Model):
         verbose_name = 'Баланс пользователя'
         verbose_name_plural = 'СТАБИЛИЗАЦИОННЫЙ ПУЛ - Балансы пользователей'
 
+
 class BalanceStatus(models.TextChoices):
     IN = 'IN', 'Пополнение'
     OUT = 'OUT', 'Вывод'
@@ -67,6 +69,7 @@ class BalanceHistory(models.Model):
     tg_id = models.ForeignKey(J2MUser, verbose_name="Пользователь ID", on_delete=models.CASCADE)
     transaction = models.CharField(verbose_name="Статус транзакции", choices=BalanceStatus.choices, null=False,
                                    max_length=3)
+    transaction_type = models.TextField(verbose_name="Тип аккаунта", null=True, blank=True)
     date = models.DateTimeField(verbose_name="Дата", null=False)
     amount = models.BigIntegerField(verbose_name="Сумма", null=False)
     description = models.TextField(verbose_name="Хэш транзакции", blank=True, null=True)
@@ -104,8 +107,9 @@ class Documents(models.Model):
     tg_id = models.ForeignKey(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE, unique=True)
     documents_approve = models.BooleanField(verbose_name="KYC верификация", default=False)
     approve_contract = models.BooleanField(verbose_name="Пользовательский контракт заполнен верно?", default=False)
-    it_product = models.BooleanField(verbose_name="Подтвердил ли пользователь Приложение No 1 к Условиям применения IT продукта", blank=True,
-                                   null=True)
+    it_product = models.BooleanField(
+        verbose_name="Подтвердил ли пользователь Приложение No 1 к Условиям применения IT продукта", blank=True,
+        null=True)
 
     def __str__(self):
         return f"Пользователь: {self.tg_id}"
@@ -209,6 +213,7 @@ class MessageChoice(models.TextChoices):
     CA = "CA", "Личный аккаунт"
     ALL = "ALL", "Все пользователи"
     EMP = "EMP", "Без смарт-контракта"
+    WOH = 'WOH', 'С закончившимся холдом'
 
 
 class SendMessageForGroup(models.Model):
@@ -241,7 +246,6 @@ class EveryDayBalance(models.Model):
     balance_busd = models.BigIntegerField(verbose_name="Баланс (BUSD)", blank=True, null=True)
     total = models.BigIntegerField(verbose_name="Общий баланс (без учета коэфициентов)", blank=True, null=True)
 
-
     class Meta:
         verbose_name = 'Коллективный счет'
         verbose_name_plural = 'Баланс J2M (Ежедневный)'
@@ -255,6 +259,3 @@ class APIKeys(models.Model):
     class Meta:
         verbose_name = 'Binance J2M'
         verbose_name_plural = 'Binance API J2M'
-
-
-

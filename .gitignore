@@ -1,0 +1,12 @@
+.idea
+.env
+*.json
+*.html
+*.css
+
+
+/static/
+/templates/
+/text/migrations/
+/static/home/
+/app/migrations/

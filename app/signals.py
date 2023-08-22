@@ -79,7 +79,10 @@ async def get_tg_id_nft():
     try:
         cur.execute("SELECT tg_id_id FROM app_nft WHERE status='Successful'")
         result = cur.fetchall()
-        return result
+        if result:
+            return [tg_id[0] for tg_id in result]
+        else:
+            return None
     finally:
         cur.close()
         db.close()
@@ -90,7 +93,10 @@ async def get_tg_id_all():
     try:
         cur.execute("SELECT tg_id FROM app_j2muser")
         result = cur.fetchall()
-        return result
+        if result:
+            return [tg_id[0] for tg_id in result]
+        else:
+            return None
     finally:
         cur.close()
         db.close()
@@ -101,7 +107,10 @@ async def get_tg_id_du():
     try:
         cur.execute("SELECT tg_id FROM app_j2muser WHERE status='500' OR status='1000'")
         result = cur.fetchall()
-        return result
+        if result:
+            return [tg_id[0] for tg_id in result]
+        else:
+            return None
     finally:
         cur.close()
         db.close()
@@ -112,7 +121,10 @@ async def get_tg_id_ca():
     try:
         cur.execute("SELECT tg_id FROM app_j2muser WHERE status='15000'")
         result = cur.fetchall()
-        return result
+        if result:
+            return [tg_id[0] for tg_id in result]
+        else:
+            return None
     finally:
         cur.close()
         db.close()
@@ -123,6 +135,31 @@ async def get_tg_id_loh():
     try:
         cur.execute("SELECT tg_id_id FROM app_nft WHERE status is NULL")
         result = cur.fetchall()
+        if result:
+            return [tg_id[0] for tg_id in result]
+        else:
+            return None
+    finally:
+        cur.close()
+        db.close()
+
+
+async def get_first_transaction(tg_id):
+    db, cur = connect()
+    try:
+        cur.execute("SELECT * FROM app_balancehistory WHERE tg_id_id = %s AND transaction = %s", (tg_id, "IN"))
+        result = cur.fetchone()
+        return result
+    finally:
+        cur.close()
+        db.close()
+
+
+async def get_hold(tg_id):
+    db, cur = connect()
+    try:
+        cur.execute("SELECT hold FROM app_balance WHERE tg_id_id = %s", (tg_id,))
+        result = cur.fetchone()
         return result
     finally:
         cur.close()
@@ -332,16 +369,30 @@ def send_message_for_user(sender, instance, **kwargs):
             tg_ids = await get_tg_id_ca()
         if instance.group == "EMP":
             tg_ids = await get_tg_id_loh()
-
+        if instance.group == 'WOH':
+            new_list = []
+            for tg_id in tg_ids:
+                first_trans = await get_first_transaction(tg_id)
+                date_first = first_trans[2] if first_trans is not None else None
+                hold = await get_hold(tg_id)
+                hold = hold[0] if hold is not None else 0
+                withdrawal_date = date_first + datetime.timedelta(days=hold) if date_first and hold else None
+                now = datetime.datetime.now()
+                now = now.replace(tzinfo=datetime.timezone.utc)
+                if withdrawal_date:
+                    if now >= date_first + datetime.timedelta(days=hold):
+                        new_list.append(tg_id)
+            tg_ids = new_list
         for tg_id in tg_ids:
-            language = get_language(tg_id[0])
+            print(tg_id)
+            language = get_language(tg_id)
             text = f"<em>Администратор отправил сообщение:</em>\n\n" \
                    f"{instance.text}"
             if language == "EN":
                 text = f"<em>The administrator send message:</em>" \
                        f"{instance.text}"
             try:
-                await bot.send_message(chat_id=tg_id[0],
+                await bot.send_message(chat_id=tg_id,
                                        text=text,
                                        parse_mode=ParseMode.HTML,
                                        disable_notification=True,

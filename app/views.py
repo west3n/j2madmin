@@ -2,6 +2,7 @@ from io import BytesIO
 from django.http import HttpResponseNotFound, HttpResponse, FileResponse
 from PIL import Image
 import os
+from django.shortcuts import render
 
 
 def image_view(request, path):
