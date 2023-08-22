@@ -16,3 +16,31 @@ def image_view(request, path):
         return response
     else:
         return HttpResponseNotFound('File not found')
+
+
+def home(request):
+    return render(request, 'home/home.html')
+
+
+def balance_view():
+    pass
+
+
+def deposit_view():
+    pass
+
+
+def withdraw_view():
+    pass
+
+
+def info_view():
+    pass
+
+
+def partners_view():
+    pass
+
+
+def support_view():
+    pass

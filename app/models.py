@@ -104,7 +104,7 @@ class Referral(models.Model):
 
 
 class Documents(models.Model):
-    tg_id = models.ForeignKey(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE, unique=True)
+    tg_id = models.OneToOneField(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE, unique=True)
     documents_approve = models.BooleanField(verbose_name="KYC верификация", default=False)
     approve_contract = models.BooleanField(verbose_name="Пользовательский контракт заполнен верно?", default=False)
     it_product = models.BooleanField(
