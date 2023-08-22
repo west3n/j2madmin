@@ -1,6 +1,6 @@
 from django.contrib import admin
 from app.models import J2MUser, Balance, BalanceHistory, Referral, Documents, Binance, Thedex, Output, NFT, Form, \
-    SendMessage, SendMessageForGroup, BalanceJ2M, EveryDayBalance, APIKeys
+    SendMessage, SendMessageForGroup, BalanceJ2M, EveryDayBalance, APIKeys, StabPool
 from django.utils.html import format_html
 
 
@@ -37,7 +37,7 @@ class BalanceAdmin(admin.ModelAdmin):
 
 
 class BalanceHistoryAdmin(admin.ModelAdmin):
-    list_display = ['tg_id', 'transaction', 'date']
+    list_display = ['tg_id', 'transaction', 'transaction_type', 'date']
     search_fields = ['tg_id_id__tg_id', 'tg_id_id__tg_username']
     list_filter = ['tg_id_id__tg_id', 'tg_id_id__tg_username', 'date']
 
@@ -127,6 +127,11 @@ class J2MBinanceAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+
+class StabpoolAdmin(admin.ModelAdmin):
+    list_display = ['tg_id', 'balance', 'deposit', 'withdrawal', 'hold', 'weekly_profit']
+
+
 admin.site.register(J2MUser, J2MAdmin)
 admin.site.register(Balance, BalanceAdmin)
 admin.site.register(BalanceHistory, BalanceHistoryAdmin)
@@ -142,4 +147,4 @@ admin.site.register(SendMessageForGroup, SendMessageForGroupAdmin)
 admin.site.register(BalanceJ2M, BalanceJ2MAdmin)
 admin.site.register(EveryDayBalance, EveryDayBalanceAdmin)
 admin.site.register(APIKeys, J2MBinanceAdmin)
-
+admin.site.register(StabPool, StabpoolAdmin)
