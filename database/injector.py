@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 import psycopg2
@@ -109,6 +110,29 @@ async def balance_data():
                 first_withdrawal_date.strftime("%Y-%m-%d") if first_withdrawal_date else 'Нет данных',
                 row[6], row[7] if row[7] else 0)
             new_data.append(new_row)
+        return new_data
+    finally:
+        cur.close()
+        db.close()
+
+
+async def stabpool_data():
+    db, cur = connect()
+    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    try:
+        cur.execute("SELECT tg_id_id, balance, deposit, withdrawal, hold, weekly_profit FROM app_stabpool")
+        rows = cur.fetchall()
+        new_data = []
+        for row in rows:
+            tg_id = row[0]
+            cur.execute("SELECT date FROM app_balancehistory WHERE tg_id_id = %s "
+                        "AND transaction = %s AND transaction_type = %s ORDER BY date LIMIT 1",
+                        (tg_id, "IN", "Стабилизационный пул"))
+            result = cur.fetchone()
+            first_transaction = result[0] if result else None
+            if first_transaction:
+                new_row = (now, row[0], row[1], row[2], row[3], row[4], first_transaction.strftime('%Y-%m-%d'), row[5] if row[5] else 0)
+                new_data.append(new_row)
         return new_data
     finally:
         cur.close()
