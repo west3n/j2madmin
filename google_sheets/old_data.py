@@ -85,3 +85,15 @@ async def stabpool_sheets():
     balance_data = await injector.stabpool_data()
     for row_data in balance_data:
         worksheet.append_row(row_data)
+
+
+async def demo_sheets():
+    sh = await sheets_connection()
+    worksheet_name = "Демо аккаунты"
+    worksheet = sh.worksheet(worksheet_name)
+    balance_data = await injector.demo_data()
+    for row_data in balance_data:
+        worksheet.append_row(row_data)
+
+
+asyncio.run(j2musers_sheets())

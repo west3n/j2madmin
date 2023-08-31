@@ -384,7 +384,6 @@ def send_message_for_user(sender, instance, **kwargs):
                         new_list.append(tg_id)
             tg_ids = new_list
         for tg_id in tg_ids:
-            print(tg_id)
             language = get_language(tg_id)
             text = f"<em>Администратор отправил сообщение:</em>\n\n" \
                    f"{instance.text}"

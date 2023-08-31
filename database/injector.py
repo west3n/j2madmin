@@ -5,6 +5,11 @@ import psycopg2
 from decouple import config
 
 
+team_accounts = [835895834, 15362825, 468156477, 165030749, 6159712492, 6258470703, 254465569, 1350441479]
+ad_accounts = [340862178, 452517420, 248745860]
+test_accounts = [361957627]
+
+
 def connect():
     try:
         db = psycopg2.connect(
@@ -101,12 +106,19 @@ async def balance_data():
         new_data = []
         for row in rows:
             tg_id = row[0]
+            status = 'Реальный аккаунт'
+            if tg_id in team_accounts:
+                status = 'Команда'
+            elif tg_id in ad_accounts:
+                status = 'Реклама'
+            elif tg_id in test_accounts:
+                status = 'Тестировщик'
             cur.execute('SELECT * FROM app_balancehistory WHERE tg_id_id = %s '
                         'AND transaction = %s', (tg_id, "IN"))
             result = cur.fetchone()
             first_withdrawal_date = result[2] if result else None
             new_row = (
-                now, row[0], row[1], row[2], row[3], row[4], row[5] if row[5] else 'Пополнение юзера менее 1000',
+                now, row[0], status, row[1], row[2], row[3], row[4], row[5] if row[5] else 'Пополнение юзера менее 1000',
                 first_withdrawal_date.strftime("%Y-%m-%d") if first_withdrawal_date else 'Нет данных',
                 row[6], row[7] if row[7] else 0)
             new_data.append(new_row)
@@ -133,6 +145,22 @@ async def stabpool_data():
             if first_transaction:
                 new_row = (now, row[0], row[1], row[2], row[3], row[4], first_transaction.strftime('%Y-%m-%d'), row[5] if row[5] else 0)
                 new_data.append(new_row)
+        return new_data
+    finally:
+        cur.close()
+        db.close()
+
+
+async def demo_data():
+    db, cur = connect()
+    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    try:
+        cur.execute("SELECT tg_id_id, balance_collective, deposit_collective FROM demo_demouser")
+        rows = cur.fetchall()
+        new_data = []
+        for row in rows:
+            new_row = (now, row[0], row[1], row[2])
+            new_data.append(new_row)
         return new_data
     finally:
         cur.close()

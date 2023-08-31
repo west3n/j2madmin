@@ -18,7 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'demo',
-    'text'
+    'text',
+    'autoposting'
 ]
 
 MIDDLEWARE = [
