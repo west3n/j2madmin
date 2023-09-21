@@ -54,7 +54,7 @@ def send_post_to_group(sender, instance, **kwargs):
                     text=instance.text)
         await bot.send_message(
             chat_id=group_id,
-            text=f"\n\n<b>Время отправки</b>: {instance.post_time.strftime('%d.%m.%Y %H:%M')} GMT" \
+            text=f"\n\n<b>Время отправки</b>: {instance.post_time.strftime('%d.%m.%Y %H:%M')}" \
                  f"\n<b>Подтвердите добавление в автопостинг:</b>",
             reply_markup=yesno(instance.id))
         await session.close()

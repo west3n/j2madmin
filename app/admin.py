@@ -21,11 +21,112 @@ class OutputAdmin(admin.ModelAdmin):
     list_filter = ['tg_id_id__tg_id', 'tg_id_id__tg_username', 'date', 'approve', 'decline']
 
 
-class J2MAdmin(admin.ModelAdmin):
+class J2MCollectiveInline(admin.TabularInline):
+    model = Balance
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MStabpoolInline(admin.TabularInline):
+    model = StabPool
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MPrivateInline(admin.TabularInline):
+    model = Binance
+    exclude = ['api_key', 'secret_key']
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MNFTInline(admin.TabularInline):
+    model = NFT
+    readonly_fields = ["date", "address", "private_key", "invoiceId"]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MBalanceHistoryInline(admin.TabularInline):
+    model = BalanceHistory
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+class J2MSurveyInline(admin.TabularInline):
+    model = Form
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+class J2MDocsInline(admin.TabularInline):
+    model = Documents
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MOutputInline(admin.TabularInline):
+    model = Output
+    readonly_fields = ["wallet", "date", "amount"]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class J2MAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ['tg_id', 'tg_username', 'tg_name']
     list_display_links = ['tg_id', 'tg_username', 'tg_name']
     search_fields = ['tg_id', 'tg_username']
     list_filter = ['tg_id', 'tg_username', 'tg_name']
+    ordering = ['tg_username']
+    resource_classes = (UsersResource,)
+    inlines = [
+        J2MNFTInline,
+        J2MCollectiveInline,
+        J2MStabpoolInline,
+        J2MPrivateInline,
+        J2MBalanceHistoryInline,
+        J2MSurveyInline,
+        J2MDocsInline,
+        J2MOutputInline
+    ]
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -106,9 +207,6 @@ class SendMessageAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    # def has_add_permission(self, request):
-    #     return True
-
 
 class SendMessageForGroupAdmin(admin.ModelAdmin):
     list_display = ["group", "text"]
@@ -161,6 +259,6 @@ admin.site.register(Output, OutputAdmin)
 admin.site.register(SendMessage, SendMessageAdmin)
 admin.site.register(SendMessageForGroup, SendMessageForGroupAdmin)
 admin.site.register(BalanceJ2M, BalanceJ2MAdmin)
-admin.site.register(EveryDayBalance, EveryDayBalanceAdmin)
+# admin.site.register(EveryDayBalance, EveryDayBalanceAdmin)
 admin.site.register(APIKeys, J2MBinanceAdmin)
 admin.site.unregister(Group)

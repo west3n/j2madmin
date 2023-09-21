@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
 
+
 class Language(models.TextChoices):
     RU = 'RU', 'Русский'
     EN = 'EN', 'English'
