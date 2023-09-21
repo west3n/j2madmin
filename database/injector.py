@@ -1,11 +1,9 @@
-import asyncio
 import datetime
 
 import psycopg2
 from decouple import config
 
-
-team_accounts = [835895834, 15362825, 468156477, 165030749, 6159712492, 6258470703, 254465569, 1350441479]
+team_accounts = [835895834, 15362825, 468156477, 165030749, 6159712492, 6258470703, 254465569, 1350441479, 149019824]
 ad_accounts = [340862178, 452517420, 248745860]
 test_accounts = [361957627]
 
@@ -37,8 +35,8 @@ async def j2m_balance_data():
         cur.execute("SELECT date_monday, balance_monday_usdt, balance_monday_busd, date_sunday,"
                     " balance_sunday_usdt, balance_sunday_busd, profit FROM app_balancej2m")
         rows = cur.fetchall()
-        new_data = [(row[0].strftime('%Y-%m-%d'), row[1], row[2],
-                     row[3].strftime('%Y-%m-%d') if row[3] else 'Нет данных', row[4], row[5], row[6]) for row in rows]
+        new_data = [(row[0].strftime('%d.%m.%Y'), row[1], row[2],
+                     row[3].strftime('%d.%m.%Y') if row[3] else 'Нет данных', row[4], row[5], row[6]) for row in rows]
         return new_data
     finally:
         cur.close()
@@ -50,9 +48,10 @@ async def balancehistory_data():
     try:
         cur.execute("SELECT date, tg_id_id, transaction, amount FROM app_balancehistory")
         rows = cur.fetchall()
-        data_with_formatted_date = [(row[0].strftime('%Y-%m-%d'), row[1],
-                                     "Пополнение" if row[2] == "IN" else "Вывод",
-                                     row[3] if row[2] == "IN" else f"-{row[3]}") for row in rows]
+        data_with_formatted_date = [
+            (row[0].strftime('%d.%m.%Y'), row[1], "Пополнение" if row[2] == "IN" else "Вывод", row[3],
+             "Рекламный" if row[1] in ad_accounts or team_accounts or test_accounts else "Реальный") for row in rows
+        ]
         return data_with_formatted_date
     finally:
         cur.close()
@@ -61,7 +60,7 @@ async def balancehistory_data():
 
 async def j2m_users_data():
     db, cur = connect()
-    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    now = datetime.datetime.now().date().strftime('%d.%m.%Y')
     try:
         cur.execute("SELECT tg_id, tg_username, tg_name, language, alias, wallet, email FROM app_j2muser")
         user_rows = cur.fetchall()
@@ -88,7 +87,7 @@ async def nft_data():
     try:
         cur.execute("SELECT date, tg_id_id, status FROM app_nft")
         rows = cur.fetchall()
-        data_with_formatted_date = [(row[0].strftime('%Y-%m-%d'), row[1],
+        data_with_formatted_date = [(row[0].strftime('%d.%m.%Y'), row[1],
                                      row[2] if row[2] else "Пользователь не приобрёл NFT") for row in rows]
         return data_with_formatted_date
     finally:
@@ -98,7 +97,7 @@ async def nft_data():
 
 async def balance_data():
     db, cur = connect()
-    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    now = datetime.datetime.now().date().strftime('%d.%m.%Y')
     try:
         cur.execute("SELECT tg_id_id, balance, deposit, withdrawal, referral_balance, "
                     "hold, settings, weekly_profit FROM app_balance")
@@ -118,8 +117,9 @@ async def balance_data():
             result = cur.fetchone()
             first_withdrawal_date = result[2] if result else None
             new_row = (
-                now, row[0], status, row[1], row[2], row[3], row[4], row[5] if row[5] else 'Пополнение юзера менее 1000',
-                first_withdrawal_date.strftime("%Y-%m-%d") if first_withdrawal_date else 'Нет данных',
+                now, row[0], status, row[1], row[2], row[3], row[4],
+                row[5] if row[5] else 'Пополнение юзера менее 1000',
+                first_withdrawal_date.strftime('%d.%m.%Y') if first_withdrawal_date else 'Нет данных',
                 row[6], row[7] if row[7] else 0)
             new_data.append(new_row)
         return new_data
@@ -130,7 +130,7 @@ async def balance_data():
 
 async def stabpool_data():
     db, cur = connect()
-    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    now = datetime.datetime.now().date().strftime('%d.%m.%Y')
     try:
         cur.execute("SELECT tg_id_id, balance, deposit, withdrawal, hold, weekly_profit FROM app_stabpool")
         rows = cur.fetchall()
@@ -143,7 +143,8 @@ async def stabpool_data():
             result = cur.fetchone()
             first_transaction = result[0] if result else None
             if first_transaction:
-                new_row = (now, row[0], row[1], row[2], row[3], row[4], first_transaction.strftime('%Y-%m-%d'), row[5] if row[5] else 0)
+                new_row = (now, row[0], row[1], row[2], row[3], row[4], first_transaction.strftime('%d.%m.%Y'),
+                           row[5] if row[5] else 0)
                 new_data.append(new_row)
         return new_data
     finally:
@@ -153,7 +154,7 @@ async def stabpool_data():
 
 async def demo_data():
     db, cur = connect()
-    now = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    now = datetime.datetime.now().date().strftime('%d.%m.%Y')
     try:
         cur.execute("SELECT tg_id_id, balance_collective, deposit_collective FROM demo_demouser")
         rows = cur.fetchall()

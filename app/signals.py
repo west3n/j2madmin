@@ -11,6 +11,7 @@ from decouple import config
 from django.dispatch import receiver
 from app.models import Documents, Output, SendMessage, Binance, SendMessageForGroup
 from google_sheets.old_data import sheets_connection
+from database.injector import team_accounts, test_accounts, ad_accounts
 
 
 def connect():
@@ -256,61 +257,87 @@ def send_answer(sender, instance, **kwargs):
         bot = Bot(config("BOT_TOKEN"))
         session = await bot.get_session()
         tg_id = instance.tg_id_id
-        language = get_language(tg_id)
+        language = await get_language(tg_id)
         db, cur = connect()
-        try:
-            cur.execute("INSERT INTO app_balancehistory (tg_id_id, transaction, date, amount, description, status) "
-                        "VALUES (%s, %s, %s, %s, %s, %s)",
-                        (tg_id, "OUT", datetime.datetime.now(), instance.amount, instance.hash, True,))
-            db.commit()
-            cur.execute("UPDATE app_balance SET withdrawal=0 WHERE tg_id_id = %s", (tg_id,))
-            db.commit()
-            sh = await sheets_connection()
-            worksheet_name = "Сумма пополнения пула"
-            worksheet = sh.worksheet(worksheet_name)
-            worksheet.append_row((datetime.datetime.now().date().strftime("%Y-%m-%d"),
-                                  tg_id, "Вывод", f"-{instance.amount}"))
-        finally:
-            db.close()
-            cur.close()
-        text = f"Средства ({instance.amount} USDT) успешно выведены!\n\n" \
-               f"Хэш транзакции: {instance.hash}"
+        if instance.tg_id_id in team_accounts:
+            status = 'Команда'
+        elif instance.tg_id_id in ad_accounts:
+            status = 'Реклама'
+        elif instance.tg_id_id in test_accounts:
+            status = 'Тестировщик'
+        else:
+            status = 'Реальный'
+        if instance.approve == True:
+            try:
+                cur.execute("INSERT INTO app_balancehistory (tg_id_id, transaction, date, amount, description, status) "
+                            "VALUES (%s, %s, %s, %s, %s, %s)",
+                            (tg_id, "OUT", datetime.datetime.now(), instance.amount, instance.hash, True,))
+                db.commit()
+                cur.execute("UPDATE app_balance SET withdrawal=0 WHERE tg_id_id = %s", (tg_id,))
+                db.commit()
+                sh = await sheets_connection()
+                worksheet_name = "Сумма пополнения пула"
+                worksheet = sh.worksheet(worksheet_name)
+                worksheet.append_row((datetime.datetime.now().date().strftime("%d.%m.%Y"),
+                                      tg_id, "Вывод", f"{instance.amount}", status))
+            finally:
+                db.close()
+                cur.close()
+            text = f"Средства ({instance.amount} USDT) успешно выведены!\n\n" \
+                   f"Хэш транзакции: {instance.hash}"
 
-        if language == "EN":
-            text = f"Funds ({instance.amount} USDT) have been successfully withdrawn!\n\n"
-            f"Transaction hash: {instance.hash}"
-        await bot.send_message(chat_id=tg_id,
-                               text=text,
-                               reply_markup=keyboard_2(language),
-                               parse_mode=ParseMode.HTML,
-                               disable_notification=True,
-                               disable_web_page_preview=True)
-        await session.close()
+            if language == "EN":
+                text = f"Funds ({instance.amount} USDT) have been successfully withdrawn!\n\n"
+                f"Transaction hash: {instance.hash}"
+            await bot.send_message(chat_id=tg_id,
+                                   text=text,
+                                   reply_markup=keyboard_2(language),
+                                   parse_mode=ParseMode.HTML,
+                                   disable_notification=True,
+                                   disable_web_page_preview=True)
+            await session.close()
+        if instance.decline == True:
+            bot = Bot(config("BOT_TOKEN"))
+            session = await bot.get_session()
+            tg_id = instance.tg_id_id
+            language = await get_language(tg_id)
+            text = "Администратор отменил вашу заявку на вывод, для подробностей напишите " \
+                   "в <a href='https://t.me/J2M_Support'>Поддержку</a>"
+            if language == "EN":
+                text = "The administrator has canceled your withdrawal request. " \
+                       "For details, please contact <a href='https://t.me/J2M_Support'>Support</a>."
+            await bot.send_message(chat_id=tg_id,
+                                   text=text,
+                                   reply_markup=keyboard_2(language),
+                                   parse_mode=ParseMode.HTML,
+                                   disable_notification=True,
+                                   disable_web_page_preview=True)
+            await session.close()
 
     async_to_sync(send_message)()
 
 
-@receiver(post_delete, sender=Output)
-def send_answer(sender, instance, **kwargs):
-    async def send_message():
-        bot = Bot(config("BOT_TOKEN"))
-        session = await bot.get_session()
-        tg_id = instance.tg_id_id
-        language = get_language(tg_id)
-        text = "<b>Администратор отменил вашу заявку на вывод, для подробностей напишите " \
-               "в <a href='https://t.me/J2M_Support'>Поддержку</a></b>"
-        if language == "EN":
-            text = "<b>The administrator has canceled your withdrawal request. " \
-                   "For details, please contact <a href='https://t.me/J2M_Support'>Support</a>.</b>"
-        await bot.send_message(chat_id=tg_id,
-                               text=text,
-                               reply_markup=keyboard_2(language),
-                               parse_mode=ParseMode.HTML,
-                               disable_notification=True,
-                               disable_web_page_preview=True)
-        await session.close()
-
-    async_to_sync(send_message)()
+# @receiver(post_delete, sender=Output)
+# def send_answer(sender, instance, **kwargs):
+#     async def send_message():
+#         bot = Bot(config("BOT_TOKEN"))
+#         session = await bot.get_session()
+#         tg_id = instance.tg_id_id
+#         language = get_language(tg_id)
+#         text = "<b>Администратор отменил вашу заявку на вывод, для подробностей напишите " \
+#                "в <a href='https://t.me/J2M_Support'>Поддержку</a></b>"
+#         if language == "EN":
+#             text = "<b>The administrator has canceled your withdrawal request. " \
+#                    "For details, please contact <a href='https://t.me/J2M_Support'>Support</a>.</b>"
+#         await bot.send_message(chat_id=tg_id,
+#                                text=text,
+#                                reply_markup=keyboard_2(language),
+#                                parse_mode=ParseMode.HTML,
+#                                disable_notification=True,
+#                                disable_web_page_preview=True)
+#         await session.close()
+#
+#     async_to_sync(send_message)()
 
 
 @receiver(post_save, sender=SendMessage)

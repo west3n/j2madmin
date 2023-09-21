@@ -9,7 +9,7 @@ from database import injector
 
 async def sheets_connection():
     sheet_url = config("SHEET_URL")
-    credentials_path = "j2m-project-395212-6143ef593cd0.json"
+    credentials_path = "google_sheets/j2m-project-395212-6143ef593cd0.json"
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     gc = gspread.authorize(credentials)
@@ -55,8 +55,10 @@ async def j2musers_sheets():
             if existing_row != row_data:
                 print("Данные для пользователя с ID", tg_id, "были обновлены:")
                 worksheet.update(f"A{row_number}", [row_data])
+                await asyncio.sleep(3)
         else:
             worksheet.append_row(row_data)
+            await asyncio.sleep(3)
             print("Добавлена новая запись для пользователя с ID", tg_id)
 
 
@@ -94,6 +96,3 @@ async def demo_sheets():
     balance_data = await injector.demo_data()
     for row_data in balance_data:
         worksheet.append_row(row_data)
-
-
-asyncio.run(j2musers_sheets())

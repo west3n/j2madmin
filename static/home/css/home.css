@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #a0d9d9;
+}
+
+header {
+    background-color: #8a959b;
+    padding: 20px;
+}
+
+h1 {
+    margin: 0;
+    color: antiquewhite;
+    text-align: center;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+
+.header-links {
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.header-links li {
+    margin: 0;
+}
+
+.header-links a {
+    text-decoration: none;
+    color: antiquewhite;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+    transition: color 0.3s;
+}
+
+.header-links a:hover {
+    color: lightsalmon;
+}

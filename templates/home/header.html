@@ -1,0 +1,15 @@
+<header>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/home/css/home.css' %}" type="text/css">
+    <div class="header-content">
+        <h1>J2M Main Page</h1>
+        <ul class="header-links">
+            <li><a href="{% url 'balance' %}">Баланс</a></li>
+            <li><a href="{% url 'deposit' %}">Пополнение</a></li>
+            <li><a href="{% url 'withdraw' %}">Вывод</a></li>
+            <li><a href="{% url 'info' %}">Информация</a></li>
+            <li><a href="{% url 'partners' %}">Партнерская программа</a></li>
+            <li><a href="{% url 'support' %}">Поддержка</a></li>
+        </ul>
+    </div>
+</header>

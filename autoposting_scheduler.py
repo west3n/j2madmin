@@ -47,6 +47,7 @@ async def autoposting_task():
         data = await get_autopost_data()
         if data:
             post_id, text, post_time, image, callback_name, callback_url = data
+            image = "/django/" + image if image else None
             if not image and not callback_name:
                 await bot.send_message(group_id, text)
             elif not callback_name:

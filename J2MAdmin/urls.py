@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.urls import path
 from app import views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', RedirectView.as_view(url='/admin/', permanent=True), name='index-redirect'),
     path('balance/', views.balance_view, name='balance'),
     path('deposit/', views.deposit_view, name='deposit'),
     path('withdraw/', views.withdraw_view, name='withdraw'),

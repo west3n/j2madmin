@@ -1,6 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
-
 
 class Language(models.TextChoices):
     RU = 'RU', 'Русский'
@@ -13,16 +13,16 @@ class J2MUser(models.Model):
     tg_name = models.CharField(verbose_name='Полное имя', blank=True, null=True, max_length=255)
     status = models.CharField(verbose_name='Статус', blank=True, null=True, max_length=255)
     language = models.CharField(verbose_name='Язык', choices=Language.choices, null=False, max_length=2)
-    alias = models.TextField(verbose_name="Почта Binance", blank=True, null=True)
-    wallet = models.TextField(verbose_name="Кошелек для вывода", blank=True, null=True)
+    alias = models.CharField(verbose_name="Почта Binance", blank=True, null=True, max_length=255)
+    wallet = models.CharField(verbose_name="Кошелек для вывода", blank=True, null=True, max_length=255)
     email = models.EmailField(verbose_name="Личная почта", blank=True, null=True)
 
     def __str__(self):
         return f"{self.tg_username} - ID: {self.tg_id}"
 
     class Meta:
-        verbose_name = 'Пользователь J2M'
-        verbose_name_plural = 'Пользователи J2M'
+        verbose_name = 'J2M Пользователь'
+        verbose_name_plural = 'J2M Пользователи'
 
 
 class Balance(models.Model):
@@ -41,7 +41,7 @@ class Balance(models.Model):
 
     class Meta:
         verbose_name = 'Баланс пользователя'
-        verbose_name_plural = 'КОЛЛЕКТИВНЫЙ АККАУНТ - Балансы пользователей'
+        verbose_name_plural = 'КОЛЛЕКТИВНЫЙ АККАУНТ - Баланс пользователя'
 
 
 class StabPool(models.Model):
@@ -57,7 +57,7 @@ class StabPool(models.Model):
 
     class Meta:
         verbose_name = 'Баланс пользователя'
-        verbose_name_plural = 'СТАБИЛИЗАЦИОННЫЙ ПУЛ - Балансы пользователей'
+        verbose_name_plural = 'СТАБИЛИЗАЦИОННЫЙ ПУЛ - Баланс пользователя'
 
 
 class BalanceStatus(models.TextChoices):
@@ -131,8 +131,8 @@ class Binance(models.Model):
         return f"Пользователь: {self.tg_id}"
 
     class Meta:
-        verbose_name = 'Binance API'
-        verbose_name_plural = 'ЛИЧНЫЙ АККАУНТ - Балансы пользователей (Binance)'
+        verbose_name = 'ЛИЧНЫЙ АККАУНТ - Баланс пользователя (Binance)'
+        verbose_name_plural = 'ЛИЧНЫЙ АККАУНТ - Баланс пользователя (Binance)'
 
 
 class Thedex(models.Model):
@@ -154,12 +154,26 @@ class Output(models.Model):
     tg_id = models.ForeignKey(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE)
     amount = models.BigIntegerField(verbose_name="Сумма к выводу", null=False)
     date = models.DateTimeField(verbose_name="Дата создания заявки", null=False)
-    wallet = models.TextField(verbose_name="Кошелек для вывода TRC-20", null=False)
+    wallet = models.CharField(verbose_name="Кошелек для вывода TRC-20", null=False, max_length=255)
     approve = models.BooleanField(verbose_name="Подтверждаете отправку средств на указанный кошелек?", default=False)
-    hash = models.TextField(verbose_name="Хэш транзакции", blank=True, null=True)
+    decline = models.BooleanField(verbose_name='Отказать в выводе средств?', default=False)
+    hash = models.CharField(verbose_name="Хэш транзакции", blank=True, null=True, max_length=255,
+                            help_text='Не забудьте добавить хэш транзакции!')
 
     def __str__(self):
         return f"{self.tg_id} - Отправлено: {self.approve}"
+
+    def clean(self):
+        if self.approve and self.decline:
+            raise ValidationError("Заявка не может быть одновременно отклонена и принята!")
+        if not self.approve and not self.decline:
+            raise ValidationError("Заявка должна быть либо отклонена, либо принята!")
+        if not self.hash and self.approve:
+            raise ValidationError("Добавьте хэш транзакции!")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Заявка на вывод'
@@ -170,7 +184,7 @@ class NFT(models.Model):
     tg_id = models.OneToOneField(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE)
     invoiceId = models.TextField(verbose_name="Уникальный номер транзакции", blank=True, null=True)
     date = models.DateTimeField(verbose_name="Время начала транзакции", blank=True, null=True)
-    status = models.TextField(verbose_name="Статус транзакции", blank=True, null=True)
+    status = models.CharField(verbose_name="Статус транзакции", blank=True, null=True, max_length=20)
     address = models.TextField(verbose_name="Адрес кошелька с NFT", blank=True, null=True)
     private_key = models.TextField(verbose_name="Приватный ключ", blank=True, null=True)
 
@@ -184,8 +198,8 @@ class NFT(models.Model):
 
 class Form(models.Model):
     tg_id = models.OneToOneField(J2MUser, verbose_name="Пользователь", on_delete=models.CASCADE)
-    name = models.TextField(verbose_name="ФИО", null=False)
-    social = models.TextField(verbose_name="Ссылка на социальную сеть", null=False)
+    name = models.CharField(verbose_name="ФИО", null=False, max_length=255)
+    social = models.CharField(verbose_name="Ссылка на социальную сеть", null=False, max_length=255)
 
     def __str__(self):
         return f"Пользователь: {self.tg_id}"

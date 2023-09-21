@@ -1,0 +1,11 @@
+[Unit]
+Description=Autoposting Scheduler Service
+After=network.target
+
+[Service]
+ExecStart=/django/venv/bin/python3 /django/autoposting_scheduler.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
