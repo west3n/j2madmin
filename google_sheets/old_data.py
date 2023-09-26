@@ -9,7 +9,7 @@ from database import injector
 
 async def sheets_connection():
     sheet_url = config("SHEET_URL")
-    credentials_path = "google_sheets/j2m-project-395212-6143ef593cd0.json"
+    credentials_path = "j2m-project-395212-6143ef593cd0.json"
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     gc = gspread.authorize(credentials)

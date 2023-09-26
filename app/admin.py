@@ -1,12 +1,10 @@
 from django.contrib import admin
-from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
-
 from app.models import J2MUser, Balance, BalanceHistory, Referral, Documents, Binance, Thedex, Output, NFT, Form, \
-    SendMessage, SendMessageForGroup, BalanceJ2M, EveryDayBalance, APIKeys, StabPool
+    SendMessage, SendMessageForGroup, APIKeys, StabPool
 from django.contrib.auth.models import Group
-from import_export import resources, fields
+from import_export import resources
 from import_export.admin import ImportExportMixin
 
 
@@ -218,18 +216,18 @@ class SendMessageForGroupAdmin(admin.ModelAdmin):
         return False
 
 
-class BalanceJ2MAdmin(admin.ModelAdmin):
-    list_display = ["date_monday", "balance_monday_usdt", "balance_monday_busd", "date_sunday",
-                    "balance_sunday_usdt", "balance_sunday_busd", "profit"]
-
-    # def has_change_permission(self, request, obj=None):
-    #     return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    # def has_add_permission(self, request):
-    #     return False
+# class BalanceJ2MAdmin(admin.ModelAdmin):
+#     list_display = ["date_monday", "balance_monday_usdt", "balance_monday_busd", "date_sunday",
+#                     "balance_sunday_usdt", "balance_sunday_busd", "profit"]
+#
+#     def has_change_permission(self, request, obj=None):
+#         return False
+#
+#     def has_delete_permission(self, request, obj=None):
+#         return False
+#
+#     def has_add_permission(self, request):
+#         return False
 
 
 class EveryDayBalanceAdmin(admin.ModelAdmin):
@@ -258,7 +256,7 @@ admin.site.register(Thedex, ThedexAdmin)
 admin.site.register(Output, OutputAdmin)
 admin.site.register(SendMessage, SendMessageAdmin)
 admin.site.register(SendMessageForGroup, SendMessageForGroupAdmin)
-admin.site.register(BalanceJ2M, BalanceJ2MAdmin)
+# admin.site.register(BalanceJ2M, BalanceJ2MAdmin)
 # admin.site.register(EveryDayBalance, EveryDayBalanceAdmin)
 admin.site.register(APIKeys, J2MBinanceAdmin)
 admin.site.unregister(Group)

@@ -1,4 +1,3 @@
-from io import BytesIO
 from django.http import HttpResponseNotFound, HttpResponse, FileResponse
 from PIL import Image
 import os

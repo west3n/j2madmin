@@ -20,7 +20,9 @@ INSTALLED_APPS = [
     'app',
     'demo',
     'text',
-    'autoposting'
+    'autoposting',
+    'promo',
+    'weekly'
 ]
 
 MIDDLEWARE = [
