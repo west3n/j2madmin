@@ -18,6 +18,6 @@ class DemoStabPoolAdmin(admin.ModelAdmin):
     list_display = ['tg_id', 'balance', 'deposit', 'withdrawal', 'hold', 'weekly_profit']
 
 
-admin.site.register(DemoUser, DemoAdmin)
-admin.site.register(DemoBalanceHistory, DemoBalanceHistoryAdmin)
-admin.site.register(DemoStabPool, DemoStabPoolAdmin)
+# admin.site.register(DemoUser, DemoAdmin)
+# admin.site.register(DemoBalanceHistory, DemoBalanceHistoryAdmin)
+# admin.site.register(DemoStabPool, DemoStabPoolAdmin)
